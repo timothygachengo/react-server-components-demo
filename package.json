@@ -1,0 +1,15 @@
+{
+  "name": "rendercon-rsc",
+  "version": "1.0.0",
+  "description": "",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "ssr:dev": "ssr-from-scratch dev"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@9.11.0"
+}

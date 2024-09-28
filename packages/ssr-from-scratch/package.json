@@ -1,0 +1,30 @@
+{
+  "name": "ssr-from-scratch",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "dev": "node --experimental-strip-types --conditions react-server --watch server.ts",
+    "build:jsx": "esbuild"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "browserslist": "defaults",
+  "dependencies": {
+    "es-module-lexer": "^1.5.4",
+    "express": "^5.0.0",
+    "react": "19.0.0-rc-3edc000d-20240926",
+    "react-dom": "19.0.0-rc-3edc000d-20240926",
+    "react-server-dom-vite-alpha": "19.0.0-rc-55dd0b1d0e-20240523",
+    "react-server-dom-webpack": "0.0.0-experimental-3edc000d-20240926"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/react": "^18.3.10",
+    "@types/react-dom": "^18.3.0",
+    "esbuild": "^0.24.0",
+    "typescript": "^5.6.2"
+  }
+}
