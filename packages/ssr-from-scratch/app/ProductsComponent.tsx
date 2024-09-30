@@ -1,9 +1,9 @@
 import React, { Suspense, lazy } from 'react';
 // @ts-ignore
-import Button from './Button';
-// @ts-ignore
 import { Product } from './types';
 
+// @ts-ignore
+import Button from './Button.tsx';
 interface ProductResponse {
     products: Product[];
 }
@@ -44,6 +44,7 @@ export default async function ProductsComponent() {
                         <p>Price: ${product.price}</p>
                         <p>Rating: {product.rating}/5</p>
                         <Button />
+                       
                     </div>
                 ))
                 : <div>No products found</div>}

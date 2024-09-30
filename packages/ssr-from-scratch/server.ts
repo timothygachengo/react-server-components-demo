@@ -8,14 +8,15 @@ import { parse } from 'es-module-lexer';
 import { writeFile } from 'node:fs/promises';
 // import * as ReactServerDOM  from 'react-server-dom-webpack/server.browser';
 import * as ReactServerDOM from 'react-server-dom-vite-alpha/server.browser';
+import * as ReactServerDOM2 from 'react-server-dom-vite-alpha/server.node';
+import { relative } from 'node:path';
+import e from 'express';
+const { renderToReadableStream } = ReactServerDOM;
+const { renderToPipeableStream } = ReactServerDOM2;
 
-const { renderToPipeableStream, renderToReadableStream } = ReactServerDOM;
-
-console.log(renderToReadableStream);
 
 
 const app = express();
-
 app.use("/dist", express.static('./dist'));
 
 app.get('/', (req, res) => {
@@ -26,43 +27,54 @@ app.get('/', (req, res) => {
 });
 
 const appDirectory = new URL('./app/', import.meta.url);
+const distDirectory = new URL('./dist/', import.meta.url);
 
 const resolveApp = (path = '') => {
     return fileURLToPath(new URL(path, appDirectory));
 }
 
+const resolveDist = (path = '') => {
+    return fileURLToPath(new URL(path, distDirectory));
+}
 const clientComponentMap = {};
 
 
 async function buildJsx() {
     const clientComponents = new Set();
     // regex for .tsx and .jsx files
-    const reactComponentRegex = /\.(tsx|jsx)$/i;
-
+    const reactFileRegex = /\.(tsx|jsx|ts|js)$/;
+    const clientComponentRegex = /^['"]use client['"];?\s*(?:import|export|const|let|var|function)/;
+    const serverComponentRegex = /^['"]use server['"];?\s*(?:import|export|const|let|var|function)/;
     // Build the server components
     await esbuild.build({
         bundle: true,
         format: "esm",
+        logLevel: "info",
         entryPoints: [resolveApp('entry-server.tsx')],
         outdir: "dist",
         packages: "external",
-        platform: "node",
-        resolveExtensions: [".ts", ".tsx", ".js", ".jsx"],
-        jsx: "transform",
+        loader: {
+            '.tsx': 'tsx',
+            '.ts': 'ts',
+            '.js': 'js',
+            '.jsx': 'jsx'
+        },
         plugins: [
             {
                 name: "resolve-client-imports",
                 setup(build) {
-                    build.onResolve({ filter: reactComponentRegex }, async ({ path }) => {
-                        const relativePath = path.replace(/['"]/g, '');
+                    build.onResolve({ filter: reactFileRegex }, async ({ path : rp }) => {
+                        const formatPath = rp.replace(/['"]/g, '');
+                        const relativePath = resolveApp(formatPath);
+
                         const contents = fs.readFileSync(relativePath, 'utf-8');
 
                         if (contents.startsWith("'use client'")) {
                             clientComponents.add(relativePath);
-                            console.log('clientComponents', clientComponents);
+                            // only extract the file name
                             return {
                                 external: true,
-                                path: path
+                                path: relativePath
                             }
 
 
@@ -74,27 +86,40 @@ async function buildJsx() {
         ]
     });
 
-    // build the cleint components
-    const { outputFiles } = await esbuild.build({
-        bundle: true,
-        entryPoints: [resolveApp('entry-client.tsx')],
-        format: "esm",
-        outdir: "dist",
-        jsx: "transform",
-        splitting: true,
+    const formattedClientComponents = Array.from(clientComponents).map((c: any) => {
+        return resolveApp(c);
     });
 
-    if (!outputFiles) return;
+    // build client entry file
+    await esbuild.build({
+        bundle: true,
+        entryPoints: [resolveApp('entry-client.tsx')],
+        format: "cjs",
+        outdir: "dist",
+        write: true,
+    });
+
+    // build the client components
+    const { outputFiles } = await esbuild.build({
+        bundle: true,
+        entryPoints: [resolveApp('entry-client.tsx'), ...formattedClientComponents],
+        format: "esm",
+        outdir: "dist",
+        write: false,
+        splitting: true,
+        packages: "bundle"
+    });
+    
 
     outputFiles.forEach(async (file) => {
-        const [, exports] = parse(file.path);
+        const [,exports] = parse(file.text);
         let contents = file.text;
 
         for (const exp of exports) {
-            const key = file.path + exp.e;
+            const key = file.path + exp.n;
 
             clientComponentMap[key] = {
-                id : `/dist/${path.basename(file.path)}`,
+                id : `/dist/${relative(resolveDist(), file.path)}`,
                 name: exp.n,
                 chunks: [],
                 async: true
@@ -103,26 +128,23 @@ async function buildJsx() {
             contents += `
             ${exp.ln}.$$id = ${JSON.stringify(key)};
             ${exp.ln}.$$typeof = Symbol.for("react.client.reference");`
-
-            await writeFile(file.path, contents, {
+            fs.writeFileSync(file.path, contents, {
                 encoding: 'utf-8'
             });
         }
-
-
-    })
+    });
 }
 
-// app.get('/render', async (req, res) => {
-//     // Basic render to string using the react-dom/server
-//     // @ts-ignore
-//     const page = await import('./dist/entry-server.js');
+app.get('/render', async (req, res) => {
+    // Basic render to string using the react-dom/server
+    // @ts-ignore
+    const page = await import('./dist/entry-server.js');
+    
+    const stream = renderToPipeableStream(createElement(page.default));
+    res.setHeader('Content-Type', 'text/html');
 
-//     const stream = renderToPipeableStream(createElement(page.default));
-//     res.setHeader('Content-Type', 'text/html');
-
-//     stream.pipe(res);
-// });
+    stream.pipe(res);
+});
 
 
 app.get('/rsc', async (req, res) => {

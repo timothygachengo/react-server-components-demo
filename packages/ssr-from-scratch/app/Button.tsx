@@ -1,13 +1,14 @@
-'use client';
+'use client'
 
 import React from 'react'
 
 const Button = () => {
-    const handleButtonClick = () => {
-        alert('Button clicked');
-    }
+  // const [count, setCount] = React.useState(0);
+  //   const handleButtonClick = () => {
+  //      setCount((prev) => prev + 1);
+  //   }
   return (
-    <button>Hi there</button>
+    <button onClick={() => console.log("Clicked!!")}>Hi there</button>
   )
 }
 
