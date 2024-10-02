@@ -3,7 +3,8 @@ import React, { Suspense, lazy } from 'react';
 import { Product } from './types';
 
 // @ts-ignore
-import ClientWrapper from './ClientWrapper.tsx';
+import Button from './Button';
+
 interface ProductResponse {
     products: Product[];
 }
@@ -43,13 +44,10 @@ export default async function ProductsComponent() {
                         }}>{product.title}</h3>
                         <p>Price: ${product.price}</p>
                         <p>Rating: {product.rating}/5</p>
-                        <ClientWrapper/>
-                       
+                        <Button/>
                     </div>
                 ))
                 : <div>No products found</div>}
         </div>
-
-
     )
-};
+}

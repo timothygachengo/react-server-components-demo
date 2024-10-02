@@ -1,7 +1,8 @@
 'use client';
 import {  createRoot, hydrateRoot } from 'react-dom/client';
 // @ts-ignore
-import { createFromFetch } from 'react-server-dom-vite-alpha/client.browser'
+import { createFromFetch } from 'react-server-dom-webpack/client.browser'
+import App from './App';
 
 // @ts-ignore
 window.__webpack_require__ = async (id) => {
@@ -13,10 +14,10 @@ globalThis.__webpack_require__ = async (id) => {
     return import(id);
 }
 const root = createRoot(document.getElementById('root')!);
-
+root.render(<App/>);
 
 createFromFetch(fetch('/rsc')).then((res: any) => {
     console.log(res);
-  // root.render(res)
+  
   hydrateRoot(document.getElementById('root')!, res);
 });

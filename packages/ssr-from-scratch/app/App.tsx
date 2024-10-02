@@ -1,8 +1,9 @@
 import React from 'react'
+import Button from './Button'
 
 const App = () => {
   return (
-    <div>App</div>
+    <Button/> 
   )
 }
 

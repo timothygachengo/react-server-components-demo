@@ -1,10 +1,10 @@
 import React, { lazy, Suspense } from 'react';
 
 // @ts-ignore
-const ProductsComponent = lazy(() => import('./ProductsComponent.tsx'));
+const ProductsComponent = lazy(() => import('./ProductsComponent'));
 
 
-export default function Home  () {
+export default async function Home  () {
   return (
     <div>
       <h1>Products</h1>

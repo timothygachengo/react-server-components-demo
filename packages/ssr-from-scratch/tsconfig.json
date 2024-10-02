@@ -5,11 +5,14 @@
 		"moduleResolution": "Node",
 		"target": "ESNext",
 		"jsx": "react-jsx",
-		"noEmit": true,
+		"noEmit": false,
 		"strict": true,
 		"noImplicitAny": false,
 		"allowSyntheticDefaultImports": true,
 		"resolveJsonModule": true,
-		"esModuleInterop": true
+		"esModuleInterop": true,
+	},
+	"ts-node": {
+		"experimentalResolver": true
 	}
 }

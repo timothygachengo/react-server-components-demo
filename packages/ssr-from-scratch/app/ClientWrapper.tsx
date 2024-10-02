@@ -2,7 +2,7 @@
 
 import React from 'react'
 // @ts-ignore
-import Button from './Button.tsx';
+import Button from './Button';
 
 const ClientWrapper = () => {
   return (

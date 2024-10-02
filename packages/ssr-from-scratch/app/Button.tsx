@@ -8,7 +8,7 @@ const Button = () => {
   //      setCount((prev) => prev + 1);
   //   }
   return (
-    <button onClick={(e) => console.log("Clicked!!")}>Hi there</button>
+    <button onClick={() => alert('Yay. This is a client component')}>Hi there</button>
   )
 }
 
