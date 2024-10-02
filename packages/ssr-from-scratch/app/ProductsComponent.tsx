@@ -3,7 +3,7 @@ import React, { Suspense, lazy } from 'react';
 import { Product } from './types';
 
 // @ts-ignore
-import Button from './Button.tsx';
+import ClientWrapper from './ClientWrapper.tsx';
 interface ProductResponse {
     products: Product[];
 }
@@ -43,7 +43,7 @@ export default async function ProductsComponent() {
                         }}>{product.title}</h3>
                         <p>Price: ${product.price}</p>
                         <p>Rating: {product.rating}/5</p>
-                        <Button />
+                        <ClientWrapper/>
                        
                     </div>
                 ))

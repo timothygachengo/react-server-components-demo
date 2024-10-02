@@ -1,4 +1,5 @@
-import {  createRoot } from 'react-dom/client';
+'use client';
+import {  createRoot, hydrateRoot } from 'react-dom/client';
 // @ts-ignore
 import { createFromFetch } from 'react-server-dom-vite-alpha/client.browser'
 
@@ -16,5 +17,6 @@ const root = createRoot(document.getElementById('root')!);
 
 createFromFetch(fetch('/rsc')).then((res: any) => {
     console.log(res);
-  root.render(res)
+  // root.render(res)
+  hydrateRoot(document.getElementById('root')!, res);
 });

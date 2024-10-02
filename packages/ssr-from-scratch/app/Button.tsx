@@ -8,7 +8,7 @@ const Button = () => {
   //      setCount((prev) => prev + 1);
   //   }
   return (
-    <button onClick={() => console.log("Clicked!!")}>Hi there</button>
+    <button onClick={(e) => console.log("Clicked!!")}>Hi there</button>
   )
 }
 

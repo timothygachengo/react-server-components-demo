@@ -8,12 +8,14 @@ import { parse } from 'es-module-lexer';
 import { writeFile } from 'node:fs/promises';
 // import * as ReactServerDOM  from 'react-server-dom-webpack/server.browser';
 import * as ReactServerDOM from 'react-server-dom-vite-alpha/server.browser';
-import * as ReactServerDOM2 from 'react-server-dom-vite-alpha/server.node';
+import { preserveDirectivesPlugin } from 'esbuild-plugin-preserve-directives';
+import ReactServerDOM2 from 'react-server-dom-esm/server';
 import { relative } from 'node:path';
 import e from 'express';
-const { renderToReadableStream } = ReactServerDOM;
-const { renderToPipeableStream } = ReactServerDOM2;
 
+const { renderToReadableStream } = ReactServerDOM;
+// const { renderToPipeableStream, renderToReadableStream } = ReactServerDOM2;
+console.log(renderToReadableStream);
 
 
 const app = express();
@@ -53,17 +55,11 @@ async function buildJsx() {
         entryPoints: [resolveApp('entry-server.tsx')],
         outdir: "dist",
         packages: "external",
-        loader: {
-            '.tsx': 'tsx',
-            '.ts': 'ts',
-            '.js': 'js',
-            '.jsx': 'jsx'
-        },
         plugins: [
             {
                 name: "resolve-client-imports",
                 setup(build) {
-                    build.onResolve({ filter: reactFileRegex }, async ({ path : rp }) => {
+                    build.onResolve({ filter: reactFileRegex }, async ({ path: rp }) => {
                         const formatPath = rp.replace(/['"]/g, '');
                         const relativePath = resolveApp(formatPath);
 
@@ -102,28 +98,41 @@ async function buildJsx() {
     // build the client components
     const { outputFiles } = await esbuild.build({
         bundle: true,
-        entryPoints: [resolveApp('entry-client.tsx'), ...formattedClientComponents],
+        // @ts-ignore
+        entryPoints: [resolveApp('entry-client.tsx'), ...clientComponents.values()],
         format: "esm",
         outdir: "dist",
         write: false,
         splitting: true,
-        packages: "bundle"
+        metafile: true,
+        plugins: [
+            preserveDirectivesPlugin({
+                directives: ['use client', 'use server', 'use strict'],
+                include: /\.(js|ts|jsx|tsx)$/,
+                exclude: /node_modules/,
+            })
+        ]
+
     });
-    
+
+    if (!outputFiles) {
+        return;
+    }
 
     outputFiles.forEach(async (file) => {
-        const [,exports] = parse(file.text);
+        const [, exports] = parse(file.text);
         let contents = file.text;
 
         for (const exp of exports) {
             const key = file.path + exp.n;
 
             clientComponentMap[key] = {
-                id : `/dist/${relative(resolveDist(), file.path)}`,
+                id: `/dist/${relative(resolveDist(), file.path)}`,
                 name: exp.n,
                 chunks: [],
                 async: true
             }
+
 
             contents += `
             ${exp.ln}.$$id = ${JSON.stringify(key)};
@@ -135,23 +144,25 @@ async function buildJsx() {
     });
 }
 
-app.get('/render', async (req, res) => {
-    // Basic render to string using the react-dom/server
-    // @ts-ignore
-    const page = await import('./dist/entry-server.js');
-    
-    const stream = renderToPipeableStream(createElement(page.default));
-    res.setHeader('Content-Type', 'text/html');
+// app.get('/render', async (req, res) => {
+//     // Basic render to string using the react-dom/server
+//     // @ts-ignore
+//     const page = await import('./dist/entry-server.js');
 
-    stream.pipe(res);
-});
+//     const stream = renderToPipeableStream(createElement(page.default));
+//     res.setHeader('Content-Type', 'text/html');
+
+//     stream.pipe(res);
+// });
 
 
 app.get('/rsc', async (req, res) => {
     // This is where we would import the server-rendered content
     // @ts-ignore
     const page = await import('./dist/entry-server.js');
+    // @ts-ignore
     const reactApp = createElement(page.default);
+    console.log(clientComponentMap);
     const stream = await renderToReadableStream(reactApp, clientComponentMap);
 
     const reader = stream.getReader();
