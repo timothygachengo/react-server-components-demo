@@ -3,7 +3,7 @@ import Button from './Button'
 
 const App = () => {
   return (
-    <Button/> 
+   <h1>Welcome to my app</h1>
   )
 }
 

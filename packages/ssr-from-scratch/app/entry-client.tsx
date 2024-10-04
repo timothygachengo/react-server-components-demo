@@ -14,10 +14,9 @@ globalThis.__webpack_require__ = async (id) => {
     return import(id);
 }
 const root = createRoot(document.getElementById('root')!);
-root.render(<App/>);
+
 
 createFromFetch(fetch('/rsc')).then((res: any) => {
     console.log(res);
-  
-  hydrateRoot(document.getElementById('root')!, res);
+    hydrateRoot(document.getElementById('root')!, res);
 });

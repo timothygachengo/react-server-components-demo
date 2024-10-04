@@ -1,6 +1,8 @@
 import webpack from 'webpack';
 import { fileURLToPath } from 'node:url';
-import { resolve } from 'node:path';
+import { glob } from 'glob'
+import { resolve, relative, join, parse } from 'node:path';
+import fs from 'fs';
 import { createRequire } from 'node:module';
 import ReactServerWebpackPlugin from 'react-server-dom-webpack/plugin';
 import { WebpackManifestPlugin } from 'webpack-manifest-plugin';
@@ -13,7 +15,7 @@ const __dirname = fileURLToPath(
 );
 
 /** @type {import('webpack').Configuration} */
-const csrConfig = {
+export const csrConfig = {
     mode: isProduction ? 'production' : 'development',
     devtool: false,
     entry: [resolve(__dirname, '../app/entry-client.tsx')],
@@ -63,10 +65,12 @@ const csrConfig = {
 };
 
 /** @type {import('webpack').Configuration} */
-const rscConfig = {
+export const rscConfig = {
     mode: isProduction ? 'production' : 'development',
     devtool: false,
-    entry: [resolve(__dirname, '../app/entry-server.tsx')],
+    entry: [
+        resolve(__dirname, '../routes/user/index.tsx')
+    ],
     output: {
         path: resolve(__dirname, '../dist'),
         filename: 'entry-server.js',
@@ -118,38 +122,77 @@ const rscConfig = {
             },
         ],
     },
+    
     plugins: [
         // new ReactServerWebpackPlugin({ isServer: true }),
         // new WebpackManifestPlugin({
         //     fileName: 'server-manifest.json',
         // })
+        new webpack.HotModuleReplacementPlugin(),
     ]
 };
 
-// @ts-ignore
-webpack([csrConfig, rscConfig], (err, stats) => {
-    if (err) {
-        console.error(err.stack || err);
-        if (err.message) {
-            console.error(err.message);
-        }
-        process.exit(1);
-        return;
-    }
 
-    if (!stats) {
-        console.error('No stats object found.');
-        process.exit(1);
-        return;
-    }
+// Webpack configuration for file-based router
 
-    const info = stats.toJson();
-    if (stats.hasErrors()) {
-        console.log('Finished running webpack with errors.');
-        // @ts-ignore
-        info.errors.forEach((e) => console.error(e));
-        process.exit(1);
-    } else {
-        console.log('Finished running webpack.');
-    }
-});
+// export const routerConfig = {
+//     mode: 'development',
+//     entry: () => {
+//         const routesDir = resolve(__dirname, '../routes');
+//         const entries = {};
+        
+//         function scanDir(dir) {
+//             const files = fs.readdirSync(dir);
+//             files.forEach(file => {
+//                 const filePath = join(dir, file);
+//                 const stat = fs.statSync(filePath);
+//                 if (stat.isDirectory()) {
+//                     scanDir(filePath);
+//                 } else if (file.endsWith('.tsx')) {
+//                     const relativePath = relative(routesDir, filePath);
+//                     const entryName = relativePath.replace(/\.tsx$/, '');
+//                     entries[entryName] = filePath;
+//                 }
+//             });
+//         }
+        
+//         scanDir(routesDir);
+//         return entries;
+//     },
+//     output: {
+//         path: resolve(__dirname, '../dist/routes'),
+//         filename: '[name].js',
+//         library: {
+//             type: 'module',
+//         },
+//     },
+//     experiments: {
+//         outputModule: true,
+//     },
+//     resolve: {
+//         extensions: ['.tsx', '.ts', '.js'],
+//     },
+//     module: {
+//         rules: [
+//             {
+//                 test: /\.tsx?$/,
+//                 use: [
+//                     'swc-loader',
+//                     {
+//                         loader: resolve(__dirname, './plugins/RSCWebpackPlugin.js'),
+//                         options: {
+//                             isServer: false,
+//                         },
+//                     },
+//                 ],
+//                 exclude: /node_modules/,
+//             },
+//         ],
+//     },
+//     plugins: [
+//         new webpack.DefinePlugin({
+//             'process.env.NODE_ENV': JSON.stringify('development'),
+//         }),
+//     ],
+// };
+

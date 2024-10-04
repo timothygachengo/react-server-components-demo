@@ -6,7 +6,8 @@
   "main": "server.js",
   "scripts": {
     "dev": "rm -rf dist && node ./scripts/build.js && node --experimental-strip-types --loader ts-node/esm --conditions react-server --watch server.ts",
-    "build:jsx": "esbuild"
+    "build:jsx": "esbuild",
+    "webpack": "webpack --config ./scripts/build.js --watch"
   },
   "keywords": [],
   "author": "",
@@ -14,7 +15,10 @@
   "browserslist": "defaults",
   "dependencies": {
     "es-module-lexer": "^1.5.4",
-    "express": "^5.0.0"
+    "express": "^5.0.0",
+    "glob": "^11.0.0",
+    "react": "18.3.0-canary-c3048aab4-20240326",
+    "react-dom": "18.3.0-canary-c3048aab4-20240326"
   },
   "devDependencies": {
     "@babel/register": "^7.24.6",
