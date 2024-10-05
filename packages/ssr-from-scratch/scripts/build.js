@@ -67,7 +67,7 @@ export const rscConfig = {
     mode: isProduction ? 'production' : 'development',
     devtool: false,
     entry: [
-        resolve(__dirname, '../routes/user/index.tsx')
+        resolve(__dirname, '../app/entry-server.tsx')
     ],
     output: {
         path: resolve(__dirname, '../dist'),

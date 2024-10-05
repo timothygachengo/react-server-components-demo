@@ -47,12 +47,12 @@ console.log(renderToPipeableStream);
 const app = express();
 app.use("/dist", express.static('./dist'));
 
-// app.get('/', (req, res) => {
-//     // render the client-side app
-//     // load the html file
-//     const html = fs.readFileSync(path.resolve('./index.html'), 'utf-8');
-//     return res.send(html);
-// });
+app.get('/', (req, res) => {
+    // render the client-side app
+    // load the html file
+    const html = fs.readFileSync(path.resolve('./index.html'), 'utf-8');
+    return res.send(html);
+});
 
 
 app.get('/rsc', async (req, res) => {
@@ -75,58 +75,58 @@ app.get('/rsc', async (req, res) => {
 });
 
 
-app.all(/(.*)/, async (req, res) => {
-    console.log(req.url);
-    console.log(req.path);
-    if (req.url === '/') {
-        const html = fs.readFileSync(path.resolve('./index.html'), 'utf-8');
-        return res.send(html);
-    }
+// app.all(/(.*)/, async (req, res) => {
+//     console.log(req.url);
+//     console.log(req.path);
+//     if (req.url === '/') {
+//         const html = fs.readFileSync(path.resolve('./index.html'), 'utf-8');
+//         return res.send(html);
+//     }
 
-    if (req.url === '/plain') {
-        const page = await import('./dist/entry-server.js');
+//     // if (req.url === '/plain') {
+//     //     const page = await import('./dist/entry-server.js');
 
-        const reactElements = createElement(page.default);
+//     //     const reactElements = createElement(page.default);
 
-        const clientComponentMap = JSON.parse(
-            await readFile(resolveDist('react-client-manifest.json'), {
-                encoding: 'utf-8'
-            })
-        );
+//     //     const clientComponentMap = JSON.parse(
+//     //         await readFile(resolveDist('react-client-manifest.json'), {
+//     //             encoding: 'utf-8'
+//     //         })
+//     //     );
 
-        const stream = ReactDOM.renderToStaticMarkup(reactElements);
-        console.log(stream);
-        return res.send(stream);
-        // return;
-
-
-    }
-
-    // File-based router
-    const filePath = path.join(__dirname, 'dist', 'routes', req.path,  'index.js');
-    console.log(filePath);
-    if (fs.existsSync(filePath)) {
-        // try {
-            // Dynamically import the component
-            const Component = await import(filePath);
-
-            const reactElement = createElement(Component.default);
-            console.log(reactElement);
-            // Create a readable stream from the component
-            // const stream = await renderToPipeableStream(reactElement);
-
-            // console.log(stream);
+//     //     const stream = ReactDOM.renderToStaticMarkup(reactElements);
+//     //     console.log(stream);
+//     //     return res.send(stream);
+//     //     // return;
 
 
-            // Pipe the stream to the response
-            // stream.pipe(res);
-        // } catch (error) {
-        //     console.error('Error rendering component:', error);
-        //     res.status(500).send('Internal Server Error');
-        // }
-    }
+//     // }
 
-})
+//     // File-based router
+//     const filePath = path.join(__dirname, 'dist', 'routes', req.path,  'index.js');
+//     console.log(filePath);
+//     if (fs.existsSync(filePath)) {
+//         // try {
+//             // Dynamically import the component
+//             const Component = await import(filePath);
+
+//             const reactElement = createElement(Component.default);
+//             console.log(reactElement);
+//             // Create a readable stream from the component
+//             // const stream = await renderToPipeableStream(reactElement);
+
+//             // console.log(stream);
+
+
+//             // Pipe the stream to the response
+//             // stream.pipe(res);
+//         // } catch (error) {
+//         //     console.error('Error rendering component:', error);
+//         //     res.status(500).send('Internal Server Error');
+//         // }
+//     }
+
+// })
 
 async function buildJsx() {
     // @ts-ignore
@@ -173,6 +173,6 @@ async function buildJsx() {
 
 
 app.listen(4000, async () => {
-    // await buildJsx();
+    await buildJsx();
     console.log('Server is running on http://localhost:4000');
 });
