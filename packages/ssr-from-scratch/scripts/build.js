@@ -5,8 +5,6 @@ import { resolve, relative, join, parse } from 'node:path';
 import fs from 'fs';
 import { createRequire } from 'node:module';
 import ReactServerWebpackPlugin from 'react-server-dom-webpack/plugin';
-import { WebpackManifestPlugin } from 'webpack-manifest-plugin';
-import nodeExternals from 'webpack-node-externals';
 
 const isProduction = process.env.NODE_ENV === 'production';
 const require = createRequire(import.meta.url);
@@ -122,7 +120,7 @@ export const rscConfig = {
             },
         ],
     },
-    
+
     plugins: [
         // new ReactServerWebpackPlugin({ isServer: true }),
         // new WebpackManifestPlugin({
@@ -140,7 +138,7 @@ export const rscConfig = {
 //     entry: () => {
 //         const routesDir = resolve(__dirname, '../routes');
 //         const entries = {};
-        
+
 //         function scanDir(dir) {
 //             const files = fs.readdirSync(dir);
 //             files.forEach(file => {
@@ -155,7 +153,7 @@ export const rscConfig = {
 //                 }
 //             });
 //         }
-        
+
 //         scanDir(routesDir);
 //         return entries;
 //     },

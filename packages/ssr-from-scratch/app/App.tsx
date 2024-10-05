@@ -1,9 +1,17 @@
-import React from 'react'
+import React, { lazy, Suspense } from 'react'
 import Button from './Button'
+
+
+const ProductsComponent = lazy(() => import('./ProductsComponent.client'));
 
 const App = () => {
   return (
-   <h1>Welcome to my app</h1>
+    <div>
+      <Suspense fallback={<div>Loading....</div>}>
+        <ProductsComponent />
+      </Suspense>
+    </div>
+
   )
 }
 

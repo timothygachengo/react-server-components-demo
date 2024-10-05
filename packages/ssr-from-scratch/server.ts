@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url'
 import { createElement } from 'react';
 import path from 'path';
 import { readFile, writeFile } from 'node:fs/promises';
+import ReactDOM from 'react-dom/server';
 // import * as ReactServerDOM  from 'react-server-dom-webpack/server.browser';
 import ReactServerDOM from 'react-server-dom-webpack/server.node';
 import { relative } from 'node:path';
@@ -46,12 +47,12 @@ console.log(renderToPipeableStream);
 const app = express();
 app.use("/dist", express.static('./dist'));
 
-app.get('/', (req, res) => {
-    // render the client-side app
-    // load the html file
-    const html = fs.readFileSync(path.resolve('./index.html'), 'utf-8');
-    return res.send(html);
-});
+// app.get('/', (req, res) => {
+//     // render the client-side app
+//     // load the html file
+//     const html = fs.readFileSync(path.resolve('./index.html'), 'utf-8');
+//     return res.send(html);
+// });
 
 
 app.get('/rsc', async (req, res) => {
@@ -80,6 +81,25 @@ app.all(/(.*)/, async (req, res) => {
     if (req.url === '/') {
         const html = fs.readFileSync(path.resolve('./index.html'), 'utf-8');
         return res.send(html);
+    }
+
+    if (req.url === '/plain') {
+        const page = await import('./dist/entry-server.js');
+
+        const reactElements = createElement(page.default);
+
+        const clientComponentMap = JSON.parse(
+            await readFile(resolveDist('react-client-manifest.json'), {
+                encoding: 'utf-8'
+            })
+        );
+
+        const stream = ReactDOM.renderToStaticMarkup(reactElements);
+        console.log(stream);
+        return res.send(stream);
+        // return;
+
+
     }
 
     // File-based router
@@ -153,6 +173,6 @@ async function buildJsx() {
 
 
 app.listen(4000, async () => {
-    await buildJsx();
+    // await buildJsx();
     console.log('Server is running on http://localhost:4000');
 });

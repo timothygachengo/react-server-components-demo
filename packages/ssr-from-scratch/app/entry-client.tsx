@@ -15,6 +15,7 @@ globalThis.__webpack_require__ = async (id) => {
 }
 const root = createRoot(document.getElementById('root')!);
 
+root.render(<App />);
 
 createFromFetch(fetch('/rsc')).then((res: any) => {
     console.log(res);
